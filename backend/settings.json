@@ -1,0 +1,23 @@
+{
+    "store_name": "Shiv Shankar Readymade Stores",
+    "store_address": "123 Market St, Suite 100",
+    "store_contact": "+1 (555) 123-4567",
+    "store_email": "contact@stockpoint.plus",
+    "gst_number": "",
+    "currency_symbol": "$",
+    "tax_rate": 8,
+    "printer_name": "Default Printer",
+    "paper_size": "80mm",
+    "print_logo": true,
+    "receipt_header": "Thank you for your business!",
+    "receipt_footer": "Please come again.",
+    "autocut": true,
+    "cash_drawer": false,
+    "copies": 1,
+    "barcode_format": "UPC",
+    "barcode_width": 2,
+    "barcode_height": 100,
+    "barcode_display_value": true,
+    "theme": "system",
+    "enable_sounds": true
+}

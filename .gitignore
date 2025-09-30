@@ -1,0 +1,31 @@
+# Node.js
+**/node_modules/
+**/dist/
+**/.vite/
+
+# Python
+**/__pycache__/
+**/*.pyc
+**/env/
+**/.venv/
+**/.mypy_cache/
+**/.pytest_cache/
+
+# Environment files
+*.env
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
