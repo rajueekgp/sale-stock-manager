@@ -49,6 +49,11 @@ interface BarcodeSettings {
   fontSize: number;
 }
 
+interface SystemSettings {
+  networkMode: 'auto' | 'manual';
+  syncInterval: number;
+}
+
 export default function Settings() {
   const [storeSettings, setStoreSettings] = useState<StoreSettings>({
     storeName: "RetailPOS Store",
@@ -78,6 +83,11 @@ export default function Settings() {
     height: 100,
     displayValue: true,
     fontSize: 12
+  });
+
+  const [systemSettings, setSystemSettings] = useState<SystemSettings>({
+    networkMode: 'auto',
+    syncInterval: 15,
   });
 
   const handleSaveSettings = (section: string) => {
@@ -508,13 +518,16 @@ export default function Settings() {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="networkMode">Network Mode</Label>
-                  <Select defaultValue="auto">
+                  <Select
+                    value={systemSettings.networkMode}
+                    onValueChange={(value: 'auto' | 'manual') => setSystemSettings(prev => ({ ...prev, networkMode: value }))}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="auto">Automatic</SelectItem>
-                      <SelectItem value="manual">Manual</SelectItem>
+                      <SelectItem value="manual">Manual (Offline)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -523,12 +536,13 @@ export default function Settings() {
                   <Input
                     id="syncInterval"
                     type="number"
-                    defaultValue="15"
+                    value={systemSettings.syncInterval}
+                    onChange={(e) => setSystemSettings(prev => ({ ...prev, syncInterval: parseInt(e.target.value) || 5 }))}
                     min="5"
                     max="60"
                   />
                 </div>
-                <Button className="w-full">
+                <Button onClick={() => handleSaveSettings('Network')} className="w-full">
                   <Save className="h-4 w-4 mr-2" />
                   Save Network Settings
                 </Button>

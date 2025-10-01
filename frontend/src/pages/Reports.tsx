@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DatePickerWithRange } from "@/components/ui/date-range-picker";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -29,9 +28,10 @@ import {
 import salesData from "@/data/sales.json";
 import productsData from "@/data/products.json";
 import purchasesData from "@/data/purchases.json";
+import type { DateRange } from "react-day-picker";
 
 export default function Reports() {
-  const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
+  const [date, setDate] = useState<DateRange | undefined>({
     from: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
     to: new Date()
   });
@@ -107,10 +107,7 @@ export default function Reports() {
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
               <label className="text-sm font-medium mb-2 block">Date Range</label>
-              <div className="flex gap-2">
-                <Input type="date" defaultValue={dateRange.from.toISOString().split('T')[0]} />
-                <Input type="date" defaultValue={dateRange.to.toISOString().split('T')[0]} />
-              </div>
+              <DatePickerWithRange date={date} setDate={setDate} />
             </div>
             <div className="w-full md:w-64">
               <label className="text-sm font-medium mb-2 block">Report Type</label>

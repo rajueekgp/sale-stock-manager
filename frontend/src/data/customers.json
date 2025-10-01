@@ -1,0 +1,44 @@
+[
+  {
+    "id": "CUST-001",
+    "name": "Rajesh Kumar",
+    "email": "rajesh.kumar@email.com",
+    "phone": "+91 9876543210",
+    "gstNumber": "29ABCDE1234F1Z5",
+    "address": "123 MG Road, Bangalore",
+    "city": "Bangalore",
+    "state": "Karnataka",
+    "pincode": "560001",
+    "creditLimit": 50000,
+    "outstandingBalance": 15000,
+    "createdDate": "2024-01-15"
+  },
+  {
+    "id": "CUST-002",
+    "name": "Priya Sharma",
+    "email": "priya.sharma@email.com",
+    "phone": "+91 9876543211",
+    "gstNumber": "27FGHIJ5678K2L6",
+    "address": "456 Andheri West, Mumbai",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "pincode": "400058",
+    "creditLimit": 75000,
+    "outstandingBalance": 0,
+    "createdDate": "2024-02-20"
+  },
+  {
+    "id": "CUST-003",
+    "name": "Amit Patel",
+    "email": "amit.patel@email.com",
+    "phone": "+91 9876543212",
+    "gstNumber": "24KLMNO9012P3Q7",
+    "address": "789 CG Road, Ahmedabad",
+    "city": "Ahmedabad",
+    "state": "Gujarat",
+    "pincode": "380009",
+    "creditLimit": 100000,
+    "outstandingBalance": 25000,
+    "createdDate": "2024-03-10"
+  }
+]
