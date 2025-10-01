@@ -1,0 +1,22 @@
+[
+  {
+    "id": "PUR001",
+    "billNumber": "BILL-2024-001",
+    "date": "2024-01-10T10:00:00Z",
+    "supplierName": "ABC Wholesale",
+    "supplierContact": "9876543211",
+    "items": [
+      {
+        "productId": "PRD001",
+        "name": "Rice Basmati 1kg",
+        "quantity": 100,
+        "purchasePrice": 140,
+        "total": 14000
+      }
+    ],
+    "subtotal": 14000,
+    "totalTax": 700,
+    "grandTotal": 14700,
+    "status": "Received"
+  }
+]

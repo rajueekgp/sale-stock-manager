@@ -1,0 +1,27 @@
+[
+  {
+    "id": "TXN001",
+    "invoiceNumber": "INV-2024-001",
+    "date": "2024-01-15T14:30:00Z",
+    "customerName": "John Doe",
+    "customerPhone": "9876543210",
+    "items": [
+      {
+        "productId": "PRD001",
+        "name": "Rice Basmati 1kg",
+        "quantity": 2,
+        "mrp": 180,
+        "salePrice": 165,
+        "discount": 0,
+        "taxRate": 5,
+        "total": 330
+      }
+    ],
+    "subtotal": 330,
+    "totalDiscount": 0,
+    "totalTax": 15.71,
+    "grandTotal": 330,
+    "paymentMethod": "Cash",
+    "status": "Completed"
+  }
+]

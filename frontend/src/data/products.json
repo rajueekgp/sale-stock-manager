@@ -1,0 +1,53 @@
+[
+  {
+    "id": "PRD001",
+    "name": "Rice Basmati 1kg",
+    "barcode": "8901030801234",
+    "hsnCode": "1006",
+    "category": "Groceries",
+    "brand": "Premium",
+    "mrp": 180,
+    "salePrice": 165,
+    "purchasePrice": 140,
+    "taxRate": 5,
+    "stock": 50,
+    "minStock": 10,
+    "unit": "kg",
+    "createdAt": "2024-01-15T10:00:00Z",
+    "updatedAt": "2024-01-15T10:00:00Z"
+  },
+  {
+    "id": "PRD002",
+    "name": "Milk 1L",
+    "barcode": "8901030801235",
+    "hsnCode": "0401",
+    "category": "Dairy",
+    "brand": "Fresh",
+    "mrp": 65,
+    "salePrice": 60,
+    "purchasePrice": 50,
+    "taxRate": 5,
+    "stock": 25,
+    "minStock": 5,
+    "unit": "L",
+    "createdAt": "2024-01-15T10:00:00Z",
+    "updatedAt": "2024-01-15T10:00:00Z"
+  },
+  {
+    "id": "PRD003",
+    "name": "Soap Bar",
+    "barcode": "8901030801236",
+    "hsnCode": "3401",
+    "category": "Personal Care",
+    "brand": "Clean",
+    "mrp": 45,
+    "salePrice": 42,
+    "purchasePrice": 35,
+    "taxRate": 18,
+    "stock": 100,
+    "minStock": 20,
+    "unit": "pcs",
+    "createdAt": "2024-01-15T10:00:00Z",
+    "updatedAt": "2024-01-15T10:00:00Z"
+  }
+]
