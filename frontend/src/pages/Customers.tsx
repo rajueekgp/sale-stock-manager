@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/card";
 import { Plus, Pencil, Trash2, Search, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { toast as toast2} from "sonner";
 import customersData from "@/data/customers.json";
 
 interface Customer {
@@ -116,6 +117,7 @@ const Customers = () => {
         createdDate: new Date().toISOString().split("T")[0],
       };
       setCustomers([...customers, newCustomer]);
+      toast2.success(`${newCustomer.name} has been added successfully.`);
       toast({
         title: "Customer Added",
         description: `${newCustomer.name} has been added successfully.`,
