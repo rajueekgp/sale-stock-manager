@@ -71,7 +71,9 @@ def create_database():
             email VARCHAR(120) UNIQUE,
             phone VARCHAR(20),
             address TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            gst_number VARCHAR(15) UNIQUE,
+            opening_balance REAL DEFAULT 0.0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP 
         )
     ''')
     
@@ -355,7 +357,34 @@ def create_and_insert():
     print("Mock Data inserted into tables successfully!")
     conn.close()
     print(f"\nDatabase 'pos_system.db' created successfully!")
+
+
+def delete_table_from_db(table_name):
+    """Connects to the database and deletes the specified table."""
+    try:
+        # Connect to your SQLite database
+        conn = sqlite3.connect('pos_system.db')
+        cursor = conn.cursor()
+
+        # The SQL command to drop the table
+        # Using f-string to insert the table name. Be cautious with user input here.
+        # Since you are defining the table name in the code, it's safe.
+        sql_command = f"DROP TABLE IF EXISTS {table_name}"
         
+        print(f"Attempting to delete table: '{table_name}'...")
+        cursor.execute(sql_command)
+        
+        # Commit the changes to the database
+        conn.commit()
+        print(f"Table '{table_name}' deleted successfully.")
+
+    except sqlite3.Error as e:
+        print(f"An error occurred: {e}")
+    finally:
+        # Always close the connection
+        if conn:
+            conn.close()
+
 
 def main():
     try:
@@ -410,6 +439,9 @@ def main():
     except Exception as e:
         print(f"Error creating database: {e}")
 
+
+
 if __name__ == "__main__":
     # create_and_insert()
-    main()
+    delete_table_from_db('customers')
+    # main()

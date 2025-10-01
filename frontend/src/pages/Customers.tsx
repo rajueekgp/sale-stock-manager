@@ -127,14 +127,14 @@ const Customers = () => {
       customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       customer.phone.includes(searchTerm) ||
       (customer.email && customer.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      customer.gstNumber.toLowerCase().includes(searchTerm.toLowerCase())
+      (customer.gstNumber && customer.gstNumber.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const addMutation = useMutation({
     ...mutationOptions,
     mutationFn: addCustomer,
-    onSuccess: (data) => {
-      toast.success(`${data.name} has been added successfully.`);
+    onSuccess: (response) => {
+      toast.success(`${response.data.name} has been added successfully.`);
       mutationOptions.onSuccess();
     },
     onError: () => toast.error("Failed to add customer."),
@@ -143,8 +143,8 @@ const Customers = () => {
   const updateMutation = useMutation({
     ...mutationOptions,
     mutationFn: updateCustomer,
-    onSuccess: (data) => {
-      toast.success(`${data.name} has been updated successfully.`);
+    onSuccess: (response) => {
+      toast.success(`${response.data.name} has been updated successfully.`);
       mutationOptions.onSuccess();
     },
     onError: () => toast.error("Failed to update customer."),
@@ -230,7 +230,7 @@ const Customers = () => {
   ) || 0;
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

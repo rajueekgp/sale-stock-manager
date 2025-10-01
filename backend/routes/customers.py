@@ -200,7 +200,6 @@ def create_customer():
             gst_number=data.get('gst_number', '').strip() if data.get('gst_number') else None,
             opening_balance=data.get('opening_balance'),
             created_at=datetime.fromisoformat(data['opening_balance_as_on']) if data.get('opening_balance_as_on') else None,
-            store_credit=data.get('opening_balance') if data.get('opening_balance') else 0
         )
         
         db.session.add(customer)
@@ -260,8 +259,8 @@ def update_customer(customer_id):
             customer.gst_number = data['gst_number'].strip() if data['gst_number'] else None
         # Note: Opening balance is typically set only at creation and not updated.
         # However, if you need to allow updates, you can uncomment the following lines.
-        # if 'opening_balance' in data:
-        #     customer.opening_balance = data['opening_balance']
+        if 'opening_balance' in data:
+            customer.opening_balance = data['opening_balance']
         # if 'opening_balance_as_on' in data and data['opening_balance_as_on']:
         #     customer.opening_balance_as_on = datetime.fromisoformat(data['opening_balance_as_on'])
 
