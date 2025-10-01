@@ -13,7 +13,8 @@ import {
   BarChart3,
   Users,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Database
 } from "lucide-react";
 
 const menuItems = [
@@ -27,6 +28,7 @@ const menuItems = [
   { icon: BarChart3, label: "Reports", path: "/reports" },
   { icon: Users, label: "Customers", path: "/customers" },
   { icon: Settings, label: "Settings", path: "/settings" },
+  { icon: Database, label: "DB Viewer", path: "/database-viewer" },
 ];
 
 export default function Sidebar() {

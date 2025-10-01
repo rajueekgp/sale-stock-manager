@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,16 +20,22 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Plus, Pencil, Trash2, Search, User } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { toast as toast2} from "sonner";
-import customersData from "@/data/customers.json";
+import { Plus, Pencil, Trash2, Search, User, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface Customer {
   id: string;
@@ -41,17 +47,54 @@ interface Customer {
   city: string;
   state: string;
   pincode: string;
-  creditLimit: number;
-  outstandingBalance: number;
-  createdDate: string;
+  opening_balance: number;
+  outstandingBalance?: number; // Optional as it might not be in the form
+  createdDate?: string; // Optional as it might not be in the form
+  total_spent: number;
+  total_orders: number;
+  last_purchase: string | null;
 }
 
+// API fetching functions
+const fetchCustomers = async (): Promise<Customer[]> => {
+  const response = await fetch('/api/customers');
+  if (!response.ok) {
+    throw new Error('Network response was not ok');
+  }
+  const jsonResponse = await response.json();
+  return jsonResponse.data; // Extract the array from the 'data' key
+};
+
+const addCustomer = async (customer: Partial<Customer>): Promise<Customer> => {
+  const response = await fetch('/api/customers', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(customer),
+  });
+  if (!response.ok) throw new Error('Failed to add customer');
+  return response.json();
+};
+
+const updateCustomer = async (customer: Partial<Customer> & { id: string }): Promise<Customer> => {
+  const response = await fetch(`/api/customers/${customer.id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(customer),
+  });
+  if (!response.ok) throw new Error('Failed to update customer');
+  return response.json();
+};
+
+const deleteCustomer = async (id: string): Promise<void> => {
+  const response = await fetch(`/api/customers/${id}`, { method: 'DELETE' });
+  if (!response.ok) throw new Error('Failed to delete customer');
+};
+
 const Customers = () => {
-  const [customers, setCustomers] = useState<Customer[]>(customersData);
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
-  const { toast } = useToast();
+  const [openingBalanceType, setOpeningBalanceType] = useState<'collect' | 'pay'>('collect');
 
   const [formData, setFormData] = useState<Partial<Customer>>({
     name: "",
@@ -62,83 +105,96 @@ const Customers = () => {
     city: "",
     state: "",
     pincode: "",
-    creditLimit: 0,
+    opening_balance: 0,
     outstandingBalance: 0,
   });
 
-  const filteredCustomers = customers.filter(
+  const queryClient = useQueryClient();
+
+  const { data: customers = [], isLoading, isError } = useQuery<Customer[]>({
+    queryKey: ['customers'],
+    queryFn: fetchCustomers,
+  });
+
+  const mutationOptions = {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['customers'] });
+    },
+  };
+
+  const filteredCustomers = customers?.filter(
     (customer) =>
       customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       customer.phone.includes(searchTerm) ||
-      customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (customer.email && customer.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
       customer.gstNumber.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const addMutation = useMutation({
+    ...mutationOptions,
+    mutationFn: addCustomer,
+    onSuccess: (data) => {
+      toast.success(`${data.name} has been added successfully.`);
+      mutationOptions.onSuccess();
+    },
+    onError: () => toast.error("Failed to add customer."),
+  });
+
+  const updateMutation = useMutation({
+    ...mutationOptions,
+    mutationFn: updateCustomer,
+    onSuccess: (data) => {
+      toast.success(`${data.name} has been updated successfully.`);
+      mutationOptions.onSuccess();
+    },
+    onError: () => toast.error("Failed to update customer."),
+  });
+
+  const deleteMutation = useMutation({ ...mutationOptions, mutationFn: deleteCustomer });
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: name === "creditLimit" || name === "outstandingBalance" 
-        ? parseFloat(value) || 0 
-        : value,
-    }));
+    setFormData((prev) => {
+      let newFormData = { ...prev };
+      if (name === "opening_balance") {
+        const rawValue = parseFloat(value) || 0;
+        newFormData.opening_balance = openingBalanceType === 'collect' ? -Math.abs(rawValue) : Math.abs(rawValue);
+      } else if (name === "outstandingBalance") {
+        newFormData.outstandingBalance = parseFloat(value) || 0;
+      } else {
+        newFormData[name as keyof typeof newFormData] = value;
+      }
+      return newFormData;
+    });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (editingCustomer) {
-      // Update existing customer
-      setCustomers(
-        customers.map((customer) =>
-          customer.id === editingCustomer.id
-            ? { ...customer, ...formData }
-            : customer
-        )
-      );
-      toast({
-        title: "Customer Updated",
-        description: `${formData.name} has been updated successfully.`,
-      });
+      updateMutation.mutate({ ...formData, id: editingCustomer.id });
     } else {
-      // Add new customer
-      const newCustomer: Customer = {
-        id: `CUST-${String(customers.length + 1).padStart(3, "0")}`,
-        name: formData.name || "",
-        email: formData.email || "",
-        phone: formData.phone || "",
-        gstNumber: formData.gstNumber || "",
-        address: formData.address || "",
-        city: formData.city || "",
-        state: formData.state || "",
-        pincode: formData.pincode || "",
-        creditLimit: formData.creditLimit || 0,
-        outstandingBalance: formData.outstandingBalance || 0,
-        createdDate: new Date().toISOString().split("T")[0],
-      };
-      setCustomers([...customers, newCustomer]);
-      toast2.success(`${newCustomer.name} has been added successfully.`);
-      toast({
-        title: "Customer Added",
-        description: `${newCustomer.name} has been added successfully.`,
-      });
+      addMutation.mutate(formData);
     }
 
     resetForm();
   };
 
   const handleEdit = (customer: Customer) => {
-    setEditingCustomer(customer);
-    setFormData(customer);
-    setIsDialogOpen(true);
+    setEditingCustomer(customer); // Keep this to manage dialog title
+    setFormData(customer); // Pre-fill form
+    if (customer.opening_balance < 0) {
+      setOpeningBalanceType('collect');
+    } else {
+      setOpeningBalanceType('pay');
+    }
+    setIsDialogOpen(true); // Open dialog
   };
 
   const handleDelete = (id: string) => {
-    setCustomers(customers.filter((customer) => customer.id !== id));
-    toast({
-      title: "Customer Deleted",
-      description: "Customer has been removed successfully.",
-      variant: "destructive",
+    deleteMutation.mutate(id, {
+      onSuccess: () => toast.success("Customer has been removed successfully."),
+      onError: () => toast.error("Failed to remove customer."),
     });
   };
 
@@ -152,18 +208,26 @@ const Customers = () => {
       city: "",
       state: "",
       pincode: "",
-      creditLimit: 0,
+      opening_balance: 0,
       outstandingBalance: 0,
     });
+    setOpeningBalanceType('collect');
     setEditingCustomer(null);
     setIsDialogOpen(false);
   };
 
-  const totalCustomers = customers.length;
-  const totalOutstanding = customers.reduce(
-    (sum, customer) => sum + customer.outstandingBalance,
+  // Reset form when dialog closes
+  useEffect(() => {
+    if (!isDialogOpen) {
+      resetForm();
+    }
+  }, [isDialogOpen]);
+
+  const totalCustomers = customers?.length || 0;
+  const totalOutstanding = customers?.reduce(
+    (sum, customer) => sum + (customer.outstandingBalance || 0),
     0
-  );
+  ) || 0;
 
   return (
     <div className="space-y-6">
@@ -176,7 +240,7 @@ const Customers = () => {
           </p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
+          <DialogTrigger asChild disabled={isLoading}>
             <Button onClick={() => resetForm()}>
               <Plus className="mr-2 h-4 w-4" />
               Add Customer
@@ -282,14 +346,29 @@ const Customers = () => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="creditLimit">Credit Limit (₹)</Label>
-                    <Input
-                      id="creditLimit"
-                      name="creditLimit"
-                      type="number"
-                      value={formData.creditLimit}
-                      onChange={handleInputChange}
-                    />
+                    <Label>Opening Balance (₹)</Label>
+                    <div className="flex h-10 w-full items-center rounded-md border border-input bg-background text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+                      <Input
+                        id="opening_balance"
+                        name="opening_balance"
+                        type="number"
+                        value={Math.abs(formData.opening_balance || 0)}
+                        onChange={handleInputChange}
+                        className="h-full w-full border-0 bg-transparent px-3 py-2 [appearance:textfield] focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                      />
+                      <Select value={openingBalanceType} onValueChange={(value: 'collect' | 'pay') => {
+                        setOpeningBalanceType(value);
+                        setFormData(prev => ({...prev, opening_balance: -prev.opening_balance }));
+                      }}>
+                        <SelectTrigger className="h-full w-[60%] rounded-l-none border-0 border-l bg-blue-100 focus:ring-0 focus:ring-offset-0">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="collect">To Collect</SelectItem>
+                          <SelectItem value="pay">To Pay</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="outstandingBalance">
@@ -310,7 +389,11 @@ const Customers = () => {
                   Cancel
                 </Button>
                 <Button type="submit">
-                  {editingCustomer ? "Update Customer" : "Add Customer"}
+                  {(addMutation.isPending || updateMutation.isPending) && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  {editingCustomer ? "Update" : "Add"}{" "}
+                  Customer
                 </Button>
               </DialogFooter>
             </form>
@@ -385,20 +468,32 @@ const Customers = () => {
                   <TableHead>Phone</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>GST Number</TableHead>
-                  <TableHead>City</TableHead>
+                  <TableHead>Total Spent</TableHead>
                   <TableHead className="text-right">Outstanding</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredCustomers.length === 0 ? (
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center h-24">
+                      <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
+                    </TableCell>
+                  </TableRow>
+                ) : isError ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center text-destructive">
+                      Failed to load customers. Please try again.
+                    </TableCell>
+                  </TableRow>
+                ) : filteredCustomers.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center">
                       No customers found
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredCustomers.map((customer) => (
+                  filteredCustomers?.map((customer) => (
                     <TableRow key={customer.id}>
                       <TableCell className="font-medium">
                         {customer.id}
@@ -406,10 +501,10 @@ const Customers = () => {
                       <TableCell>{customer.name}</TableCell>
                       <TableCell>{customer.phone}</TableCell>
                       <TableCell>{customer.email}</TableCell>
-                      <TableCell>{customer.gstNumber}</TableCell>
-                      <TableCell>{customer.city}</TableCell>
+                      <TableCell>{customer.gstNumber || 'N/A'}</TableCell>
+                      <TableCell>₹{customer.total_spent.toLocaleString("en-IN")}</TableCell>
                       <TableCell className="text-right">
-                        ₹{customer.outstandingBalance.toLocaleString("en-IN")}
+                        ₹{(customer.outstandingBalance || 0).toLocaleString("en-IN")}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
@@ -424,8 +519,11 @@ const Customers = () => {
                             variant="ghost"
                             size="icon"
                             onClick={() => handleDelete(customer.id)}
+                            disabled={deleteMutation.isPending && deleteMutation.variables === customer.id}
                           >
-                            <Trash2 className="h-4 w-4" />
+                            {deleteMutation.isPending && deleteMutation.variables === customer.id 
+                              ? <Loader2 className="h-4 w-4 animate-spin" /> 
+                              : <Trash2 className="h-4 w-4" />}
                           </Button>
                         </div>
                       </TableCell>

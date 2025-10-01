@@ -199,7 +199,7 @@ def create_customer():
             address=data.get('address', '').strip() if data.get('address') else None,
             gst_number=data.get('gst_number', '').strip() if data.get('gst_number') else None,
             opening_balance=data.get('opening_balance'),
-            opening_balance_as_on=datetime.fromisoformat(data['opening_balance_as_on']) if data.get('opening_balance_as_on') else None,
+            created_at=datetime.fromisoformat(data['opening_balance_as_on']) if data.get('opening_balance_as_on') else None,
             store_credit=data.get('opening_balance') if data.get('opening_balance') else 0
         )
         

@@ -377,8 +377,8 @@ def main():
         #     WHERE store_credit IS NULL
         # ''')
         
-        # # Add the new column 'batch_id' to the 'purchase_items' table
-        # cursor.execute("ALTER TABLE purchase_items ADD COLUMN batch_id")
+        # # Add the new column 'opening_balance' to the 'customers' table
+        # cursor.execute("ALTER TABLE customers ADD COLUMN opening_balance FLOAT DEFAULT 0.0")
         
         # # Commit changes and close connection
         # conn.commit()

@@ -77,6 +77,7 @@ class Customer(db.Model):
     phone = db.Column(db.String(20))
     address = db.Column(db.Text)
     gst_number = db.Column(db.String(15), unique=True, nullable=True)
+    opening_balance = db.Column(db.Float, default=0.0)
     store_credit = db.Column(db.Float, default=0.0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
@@ -91,6 +92,7 @@ class Customer(db.Model):
             'phone': self.phone,
             'address': self.address,
             'gst_number': self.gst_number,
+            'opening_balance': self.opening_balance,
             'store_credit': self.store_credit,
             'created_at': self.created_at.isoformat() + "Z",
             'total_purchases': sum(sale.total_amount for sale in self.sales)
